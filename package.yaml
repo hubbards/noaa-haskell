@@ -28,7 +28,7 @@ library:
   - aeson
   - bytestring
   - http-conduit
-  - text
+  - time
 
 executables:
   noaa-haskell-exe:
@@ -36,6 +36,7 @@ executables:
     source-dirs: app
     dependencies:
     - noaa-haskell
+    - http-conduit
 
 tests:
   noaa-haskell-test:
@@ -43,3 +44,7 @@ tests:
     source-dirs: test
     dependencies:
     - noaa-haskell
+    - HUnit
+    - aeson
+    - bytestring
+    - time
