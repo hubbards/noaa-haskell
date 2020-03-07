@@ -1,13 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noaa
-  ( DataSetsParams (..)
-  , Collection (..)
-  , MetaData (..)
-  , ResultSet (..)
-  , DataSet (..)
-  , getDataSets
-  ) where
+{-| TODO module documentation
+-}
+module Noaa where
 
 -- NOTE: from http-conduit package
 import Network.HTTP.Simple
@@ -32,14 +27,15 @@ import Data.Aeson
   ( FromJSON (parseJSON)
   , withObject
   , (.:)
+  , (.:?)
   )
 
 -- NOTE from bytestring package
 import qualified Data.ByteString as B
-import qualified Data.ByteString.Char8 as C
+import qualified Data.ByteString.Char8 as C8
 
--- NOTE from text package
-import qualified Data.Text as T
+-- NOTE from time package
+import Data.Time.Calendar ( Day )
 
 import Data.Maybe ( catMaybes )
 
@@ -48,25 +44,39 @@ import Data.Maybe ( catMaybes )
 
 -- TODO use URI host type
 noaaHost :: B.ByteString
-noaaHost = "www.ncdc.noaa.gov"
+noaaHost =
+  "www.ncdc.noaa.gov"
 
 -- TODO use URI path type
 noaaPath :: B.ByteString
-noaaPath = "/cdo-web/api/v2"
+noaaPath =
+  "/cdo-web/api/v2"
 
 -- TODO use URI path type
 dataSetsPath :: B.ByteString
-dataSetsPath = B.append noaaPath "/datasets"
+dataSetsPath =
+  B.append noaaPath "/datasets"
 
+paramToQueryItem :: Show a => B.ByteString -> a -> QueryItem
+paramToQueryItem name value =
+  (name, Just $ C8.pack $ show value)
+
+defaultNoaaRequest :: String -> Request
+defaultNoaaRequest token =
+    setRequestSecure True
+  . setRequestMethod "GET"
+  . setRequestHeader "token" [C8.pack token]
+  . setRequestHost noaaHost
+  $ defaultRequest
+
+-- TODO add missing parameters
 data DataSetsParams =
   DataSetsParams
     { dataSetsParamsLimit  :: Maybe Int
     , dataSetsParamsOffset :: Maybe Int
     }
 
-paramToQueryItem :: Show a => B.ByteString -> a -> QueryItem
-paramToQueryItem name value = (name, Just $ C.pack $ show value)
-
+-- TODO add missing parameters
 dataSetsParamsQuery :: DataSetsParams -> Query
 dataSetsParamsQuery (DataSetsParams limit offset) =
   catMaybes
@@ -76,13 +86,9 @@ dataSetsParamsQuery (DataSetsParams limit offset) =
 
 dataSetsRequest :: String -> DataSetsParams -> Request
 dataSetsRequest token params =
-  setRequestSecure True
-  . setRequestMethod "GET"
-  . setRequestHeader "token" [C.pack token]
-  . setRequestHost noaaHost
-  . setRequestPath dataSetsPath
+    setRequestPath dataSetsPath
   . setRequestQueryString (dataSetsParamsQuery params)
-  $ defaultRequest
+  $ defaultNoaaRequest token
 
 -- TODO rewrite this
 getDataSets :: String -> DataSetsParams -> IO (Response (Collection DataSet))
@@ -92,6 +98,7 @@ getDataSets token params =
 --------------------------------------------------------------------------------
 -- Response
 
+-- | Domain type for collections.
 data Collection a =
   Collection
     { collectionMetaData :: MetaData
@@ -105,13 +112,15 @@ instance FromJSON a => FromJSON (Collection a) where
         <$> o .: "metadata"
         <*> o .: "results"
 
-data MetaData =
+-- | Domain type for meta data.
+newtype MetaData =
   MetaData { metaDataResultSet :: ResultSet } deriving (Eq, Show)
 
 instance FromJSON MetaData where
   parseJSON =
-    withObject "MetaData" $ \ o -> fmap MetaData (o .: "resultset")
+    withObject "MetaData" $ fmap MetaData . flip (.:) "resultset"
 
+-- | Domain type for result sets.
 data ResultSet =
   ResultSet
     { resultSetLimit  :: Int
@@ -127,13 +136,15 @@ instance FromJSON ResultSet where
         <*> o .: "offset"
         <*> o .: "count"
 
+-- | Domain type for data sets, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#datasets>.
 data DataSet =
   DataSet
-    { dataSetUid          :: String
+    { dataSetUid          :: Maybe String
     , dataSetId           :: String
     , dataSetName         :: String
-    , dataSetMinDate      :: String -- TODO use POSIX date type
-    , dataSetMaxDate      :: String -- TODO use POSIX date type
+    , dataSetMinDate      :: Day
+    , dataSetMaxDate      :: Day
     , dataSetDataCoverage :: Float
     } deriving (Eq, Show)
 
@@ -141,9 +152,9 @@ instance FromJSON DataSet where
   parseJSON =
     withObject "DataSet" $ \ o ->
       DataSet
-        <$> (T.unpack <$> o .: "uid")
-        <*> (T.unpack <$> o .: "id")
-        <*> (T.unpack <$> o .: "name")
-        <*> (T.unpack <$> o .: "mindate")
-        <*> (T.unpack <$> o .: "maxdate")
-        <*> o .: "datacoverage"
+        <$> o .:? "uid" -- missing on single item results
+        <*> o .:  "id"
+        <*> o .:  "name"
+        <*> o .:  "mindate" -- ISO formatted date
+        <*> o .:  "maxdate" -- ISO formatted date
+        <*> o .:  "datacoverage"
