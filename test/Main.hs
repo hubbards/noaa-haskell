@@ -1,5 +1,13 @@
 module Main where
 
--- TODO add tests
-main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+  -- NOTE from HUnit package
+import Test.HUnit (
+    Counts
+  , runTestTT
+  )
+
+import qualified NoaaTest
+
+main :: IO Counts
+main =
+  runTestTT NoaaTest.tests
