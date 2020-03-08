@@ -52,11 +52,6 @@ noaaPath :: B.ByteString
 noaaPath =
   "/cdo-web/api/v2"
 
--- TODO use URI path type
-dataSetsPath :: B.ByteString
-dataSetsPath =
-  B.append noaaPath "/datasets"
-
 paramToQueryItem :: Show a => B.ByteString -> a -> QueryItem
 paramToQueryItem name value =
   (name, Just $ C8.pack $ show value)
@@ -69,19 +64,61 @@ defaultNoaaRequest token =
   . setRequestHost noaaHost
   $ defaultRequest
 
--- TODO add missing parameters
+-- TODO use URI path type
+dataSetsPath :: B.ByteString
+dataSetsPath =
+  B.append noaaPath "/datasets"
+
+data SortOrder =
+    Asc
+  | Desc deriving Eq
+
+instance Show SortOrder where
+  show Asc  = "asc"
+  show Desc = "desc"
+
+data DataSetsSortField =
+    Id
+  | Name
+  | MinDate
+  | MaxDate
+  | DataCoverage deriving Eq
+
+instance Show DataSetsSortField where
+  show Id           = "id"
+  show Name         = "name"
+  show MinDate      = "mindate"
+  show MaxDate      = "maxdate"
+  show DataCoverage = "datacoverage"
+
 data DataSetsParams =
   DataSetsParams
-    { dataSetsParamsLimit  :: Maybe Int
-    , dataSetsParamsOffset :: Maybe Int
+    { dataSetsParamsDataTypeId :: Maybe String
+    , dataSetsParamsLocationId :: Maybe String
+    , dataSetsParamsStationId  :: Maybe String
+    , dataSetsParamsStartDate  :: Maybe Day
+    , dataSetsParamsEndDate    :: Maybe Day
+    , dataSetsParamsSortField  :: Maybe DataSetsSortField
+    , dataSetsParamsSortOrder  :: Maybe SortOrder
+    -- default is Asc
+    , dataSetsParamsLimit      :: Maybe Int
+    -- default is 25 and max is 1000
+    , dataSetsParamsOffset     :: Maybe Int
+    -- default is 0
     }
 
--- TODO add missing parameters
 dataSetsParamsQuery :: DataSetsParams -> Query
-dataSetsParamsQuery (DataSetsParams limit offset) =
+dataSetsParamsQuery params =
   catMaybes
-    [ fmap (paramToQueryItem "limit") limit
-    , fmap (paramToQueryItem "offset") offset
+    [ fmap (paramToQueryItem "datatypeid") (dataSetsParamsDataTypeId params)
+    , fmap (paramToQueryItem "locationid") (dataSetsParamsLocationId params)
+    , fmap (paramToQueryItem "stationid") (dataSetsParamsStationId params)
+    , fmap (paramToQueryItem "startdate") (dataSetsParamsStartDate params)
+    , fmap (paramToQueryItem "enddate") (dataSetsParamsEndDate params)
+    , fmap (paramToQueryItem "sortfield") (dataSetsParamsSortField params)
+    , fmap (paramToQueryItem "sortorder") (dataSetsParamsSortOrder params)
+    , fmap (paramToQueryItem "limit") (dataSetsParamsLimit params)
+    , fmap (paramToQueryItem "offset") (dataSetsParamsOffset params)
     ]
 
 dataSetsRequest :: String -> DataSetsParams -> Request
@@ -90,7 +127,6 @@ dataSetsRequest token params =
   . setRequestQueryString (dataSetsParamsQuery params)
   $ defaultNoaaRequest token
 
--- TODO rewrite this
 getDataSets :: String -> DataSetsParams -> IO (Response (Collection DataSet))
 getDataSets token params =
   httpJSON (dataSetsRequest token params)
