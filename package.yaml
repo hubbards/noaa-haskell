@@ -21,14 +21,13 @@ description: Please see the README on GitHub at <https://github.com/hubbards/noa
 
 dependencies:
 - base >= 4.7 && < 5
+- aeson
+- bytestring
+- http-conduit
+- time
 
 library:
   source-dirs: src
-  dependencies:
-  - aeson
-  - bytestring
-  - http-conduit
-  - time
 
 executables:
   noaa-haskell-exe:
@@ -36,7 +35,6 @@ executables:
     source-dirs: app
     dependencies:
     - noaa-haskell
-    - http-conduit
 
 tests:
   noaa-haskell-test:
@@ -45,6 +43,3 @@ tests:
     dependencies:
     - noaa-haskell
     - HUnit
-    - aeson
-    - bytestring
-    - time
