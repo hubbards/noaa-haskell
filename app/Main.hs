@@ -1,3 +1,4 @@
+{-| TODO module documentation -}
 module Main where
 
 -- TODO add app
