@@ -1,3 +1,4 @@
+{-| TODO module documentation -}
 module Main where
 
   -- NOTE from HUnit package
@@ -6,8 +7,9 @@ import Test.HUnit (
   , runTestTT
   )
 
-import qualified NoaaTest
+import qualified Noaa.RequestTest
+import qualified Noaa.ResponseTest
 
 main :: IO Counts
 main =
-  runTestTT NoaaTest.tests
+  runTestTT Noaa.ResponseTest.tests
