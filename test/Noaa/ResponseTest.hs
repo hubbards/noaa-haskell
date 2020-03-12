@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 {-| TODO module documentation -}
-module Noaa.ResponseTest ( tests ) where
+module Noaa.ResponseTest (tests) where
 
 -- NOTE from HUnit package
 import Test.HUnit (
@@ -16,45 +16,45 @@ import Test.HUnit (
   )
 
 -- NOTE from aeson package
-import Data.Aeson ( decode )
+import Data.Aeson (decode)
 
 -- NOTE from bytestring package
 import qualified Data.ByteString.Lazy as B
 
 -- NOTE from time package
-import Data.Time.Format.ISO8601 ( iso8601ParseM )
+import Data.Time.Format.ISO8601 (iso8601ParseM)
 
-import Data.Maybe ( fromJust )
+import Data.Maybe (fromJust)
 
 import Noaa.Response
 
 tests :: Test
 tests =
   test
-    [ decode dataSet1' ~?= Just dataSet1
-    , decode dataSet2' ~?= Just dataSet2
-    , decode dataSet3' ~?= Just dataSet3
-    , decode dataSets' ~?= Just dataSets
-    , decode dataCatagory1'  ~?= Just dataCatagory1
-    , decode dataCatagory2'  ~?= Just dataCatagory2
-    , decode dataCatagory3'  ~?= Just dataCatagory3
-    , decode dataCatagories' ~?= Just dataCatagories
-    , decode dataType1' ~?= Just dataType1
-    , decode dataType2' ~?= Just dataType2
-    , decode dataType3' ~?= Just dataType3
-    , decode dataTypes' ~?= Just dataTypes
+    [ decode dataSet1'           ~?= Just dataSet1
+    , decode dataSet2'           ~?= Just dataSet2
+    , decode dataSet3'           ~?= Just dataSet3
+    , decode dataSets'           ~?= Just dataSets
+    , decode dataCatagory1'      ~?= Just dataCatagory1
+    , decode dataCatagory2'      ~?= Just dataCatagory2
+    , decode dataCatagory3'      ~?= Just dataCatagory3
+    , decode dataCatagories'     ~?= Just dataCatagories
+    , decode dataType1'          ~?= Just dataType1
+    , decode dataType2'          ~?= Just dataType2
+    , decode dataType3'          ~?= Just dataType3
+    , decode dataTypes'          ~?= Just dataTypes
     , decode locationCatagory1'  ~?= Just locationCatagory1
     , decode locationCatagory2'  ~?= Just locationCatagory2
     , decode locationCatagory3'  ~?= Just locationCatagory3
     , decode locationCatagories' ~?= Just locationCatagories
-    , decode location1' ~?= Just location1
-    , decode location2' ~?= Just location2
-    , decode location3' ~?= Just location3
-    , decode locations' ~?= Just locations
-    , decode station1' ~?= Just station1
-    , decode station2' ~?= Just station2
-    , decode station3' ~?= Just station3
-    , decode stations' ~?= Just stations
+    , decode location1'          ~?= Just location1
+    , decode location2'          ~?= Just location2
+    , decode location3'          ~?= Just location3
+    , decode locations'          ~?= Just locations
+    , decode station1'           ~?= Just station1
+    , decode station2'           ~?= Just station2
+    , decode station3'           ~?= Just station3
+    , decode stations'           ~?= Just stations
     ]
 
 
