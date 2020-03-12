@@ -27,7 +27,7 @@ import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C8
 
 -- NOTE from time package
-import Data.Time.Calendar ( Day )
+import Data.Time.Calendar (Day)
 
 -- | Domain type for collections.
 data Collection a =
@@ -120,11 +120,11 @@ instance FromJSON DataType where
   parseJSON =
     withObject "DataType" $ \ o ->
       DataType
-        <$> o .:   "id"
-        <*> o .:?  "name" -- missing on single item results
-        <*> o .:   "mindate" -- ISO formatted date
-        <*> o .:   "maxdate" -- ISO formatted date
-        <*> o .:   "datacoverage"
+        <$> o .:  "id"
+        <*> o .:? "name" -- missing on single item results
+        <*> o .:  "mindate" -- ISO formatted date
+        <*> o .:  "maxdate" -- ISO formatted date
+        <*> o .:  "datacoverage"
 
 -- | Domain type for location catagories, see
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locationCategories>.
@@ -145,7 +145,7 @@ instance FromJSON LocationCatagory where
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locations>.
 data Location =
   Location
-    { locationId :: String
+    { locationId           :: String
     , locationName         :: String
     , locationMinDate      :: Day
     , locationMaxDate      :: Day
@@ -156,11 +156,11 @@ instance FromJSON Location where
   parseJSON =
     withObject "Location" $ \ o ->
       Location
-        <$> o .:  "id"
-        <*> o .:  "name"
-        <*> o .:  "mindate" -- ISO formatted date
-        <*> o .:  "maxdate" -- ISO formatted date
-        <*> o .:  "datacoverage"
+        <$> o .: "id"
+        <*> o .: "name"
+        <*> o .: "mindate" -- ISO formatted date
+        <*> o .: "maxdate" -- ISO formatted date
+        <*> o .: "datacoverage"
 
 -- | Domain type for stations, see
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#stations>.
@@ -180,4 +180,15 @@ data Station =
 
 -- TODO implement
 instance FromJSON Station where
-  parseJSON = undefined
+  parseJSON =
+    withObject "Station" $ \ o ->
+      Station
+        <$> o .: "id"
+        <*> o .: "name"
+        <*> o .: "mindate" -- ISO formatted date
+        <*> o .: "maxdate" -- ISO formatted date
+        <*> o .: "datacoverage"
+        <*> o .: "elevation"
+        <*> o .: "elevationUnit"
+        <*> o .: "latitude"
+        <*> o .: "longitude"

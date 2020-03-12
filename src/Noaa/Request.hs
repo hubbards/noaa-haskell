@@ -36,9 +36,9 @@ import Network.HTTP.Simple
   )
 
 -- NOTE from time package
-import Data.Time.Calendar ( Day )
+import Data.Time.Calendar (Day)
 
-import Data.Maybe ( catMaybes )
+import Data.Maybe (catMaybes)
 
 -- TODO document
 data SortField =
