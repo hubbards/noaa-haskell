@@ -110,7 +110,7 @@ instance FromJSON DataCatagory where
 data DataType =
   DataType
     { dataTypeId           :: String
-    , dataTypeName         :: String
+    , dataTypeName         :: Maybe String
     , dataTypeMinDate      :: Day
     , dataTypeMaxDate      :: Day
     , dataTypeDataCoverage :: Float
@@ -120,11 +120,11 @@ instance FromJSON DataType where
   parseJSON =
     withObject "DataType" $ \ o ->
       DataType
-        <$> o .:  "id"
-        <*> o .:  "name"
-        <*> o .:  "mindate" -- ISO formatted date
-        <*> o .:  "maxdate" -- ISO formatted date
-        <*> o .:  "datacoverage"
+        <$> o .:   "id"
+        <*> o .:?  "name" -- missing on single item results
+        <*> o .:   "mindate" -- ISO formatted date
+        <*> o .:   "maxdate" -- ISO formatted date
+        <*> o .:   "datacoverage"
 
 -- | Domain type for location catagories, see
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locationCategories>.
@@ -172,10 +172,12 @@ data Station =
     , stationMaxDate        :: Day
     , stationDataCoverage   :: Float
     -- TODO replace with units of measurement
-    , stationElevation      :: Length Float
+    , stationElevation      :: Float
     , stationElevationUnits :: String
     , stationLatitude       :: Float
     , stationLongitude      :: Float
     } deriving (Eq, Show)
 
--- TODO FromJSON instance for Station
+-- TODO implement
+instance FromJSON Station where
+  parseJSON = undefined
