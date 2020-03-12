@@ -44,34 +44,34 @@ tests =
 dataSet1 :: DataSet
 dataSet1 =
   DataSet
-    { dataSetUid          = Just "gov.noaa.ncdc:C00861"
-    , dataSetId           = "GHCND"
+    { dataSetId           = "GHCND"
     , dataSetName         = "Daily Summaries"
     , dataSetMinDate      = fromJust (iso8601ParseM "1763-01-01")
     , dataSetMaxDate      = fromJust (iso8601ParseM "2020-03-05")
     , dataSetDataCoverage = 1
+    , dataSetUid          = Just "gov.noaa.ncdc:C00861"
     }
 
 dataSet2 :: DataSet
 dataSet2 =
   DataSet
-    { dataSetUid          = Just "gov.noaa.ncdc:C00946"
-    , dataSetId           = "GSOM"
+    { dataSetId           = "GSOM"
     , dataSetName         = "Global Summary of the Month"
     , dataSetMinDate      = fromJust (iso8601ParseM "1763-01-01")
     , dataSetMaxDate      = fromJust (iso8601ParseM "2020-01-01")
     , dataSetDataCoverage = 1
+    , dataSetUid          = Just "gov.noaa.ncdc:C00946"
     }
 
 dataSet3 :: DataSet
 dataSet3 =
   DataSet
-    { dataSetUid          = Just "gov.noaa.ncdc:C00947"
-    , dataSetId           = "GSOY"
+    { dataSetId           = "GSOY"
     , dataSetName         = "Global Summary of the Year"
     , dataSetMinDate      = fromJust (iso8601ParseM "1763-01-01")
     , dataSetMaxDate      = fromJust (iso8601ParseM "2019-01-01")
     , dataSetDataCoverage = 1
+    , dataSetUid          = Just "gov.noaa.ncdc:C00947"
     }
 
 dataSets :: Collection DataSet
@@ -83,9 +83,10 @@ dataSets =
       , resultSetCount  = 3
       }
     , collectionResults  =
-      [ dataSet1
-      , dataSet2
-      , dataSet3 ]
+      [ dataSet1 { dataSetUid = Nothing }
+      , dataSet2 { dataSetUid = Nothing }
+      , dataSet3 { dataSetUid = Nothing }
+      ]
     }
 
 dataCatagory1 :: DataCatagory
@@ -125,32 +126,32 @@ dataCatagories =
 
 dataSet1' :: B.ByteString
 dataSet1' =
-  "{ \"uid\":          \"gov.noaa.ncdc:C00861\" \
-\  , \"id\":           \"GHCND\" \
+  "{ \"id\":           \"GHCND\" \
 \  , \"name\":         \"Daily Summaries\" \
 \  , \"mindate\":      \"1763-01-01\" \
 \  , \"maxdate\":      \"2020-03-05\" \
 \  , \"datacoverage\": 1 \
+\  , \"uid\":          \"gov.noaa.ncdc:C00861\" \
 \  }"
 
 dataSet2' :: B.ByteString
 dataSet2' =
-  "{ \"uid\":          \"gov.noaa.ncdc:C00946\" \
-\  , \"id\":           \"GSOM\" \
+  "{ \"id\":           \"GSOM\" \
 \  , \"name\":         \"Global Summary of the Month\" \
 \  , \"mindate\":      \"1763-01-01\" \
 \  , \"maxdate\":      \"2020-01-01\" \
 \  , \"datacoverage\": 1 \
+\  , \"uid\":          \"gov.noaa.ncdc:C00946\" \
 \  }"
 
 dataSet3' :: B.ByteString
 dataSet3' =
-  "{ \"uid\":          \"gov.noaa.ncdc:C00947\" \
-\  , \"id\":           \"GSOY\" \
+  "{ \"id\":           \"GSOY\" \
 \  , \"name\":         \"Global Summary of the Year\" \
 \  , \"mindate\":      \"1763-01-01\" \
 \  , \"maxdate\":      \"2019-01-01\" \
 \  , \"datacoverage\": 1 \
+\  , \"uid\":          \"gov.noaa.ncdc:C00947\" \
 \  }"
 
 dataSets' :: B.ByteString
@@ -164,22 +165,19 @@ dataSets' =
 \    } \
 \  , \"results\": \
 \    [ \
-\      { \"uid\":          \"gov.noaa.ncdc:C00861\" \
-\      , \"id\":           \"GHCND\" \
+\      { \"id\":           \"GHCND\" \
 \      , \"name\":         \"Daily Summaries\" \
 \      , \"mindate\":      \"1763-01-01\" \
 \      , \"maxdate\":      \"2020-03-05\" \
 \      , \"datacoverage\": 1 \
 \      } \
-\    , { \"uid\":          \"gov.noaa.ncdc:C00946\" \
-\      , \"id\":           \"GSOM\" \
+\    , { \"id\":           \"GSOM\" \
 \      , \"name\":         \"Global Summary of the Month\" \
 \      , \"mindate\":      \"1763-01-01\" \
 \      , \"maxdate\":      \"2020-01-01\" \
 \      , \"datacoverage\": 1 \
 \      } \
-\    , { \"uid\":          \"gov.noaa.ncdc:C00947\" \
-\      , \"id\":           \"GSOY\" \
+\    , { \"id\":           \"GSOY\" \
 \      , \"name\":         \"Global Summary of the Year\" \
 \      , \"mindate\":      \"1763-01-01\" \
 \      , \"maxdate\":      \"2019-01-01\" \

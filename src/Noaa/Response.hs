@@ -8,6 +8,10 @@ module Noaa.Response
 
   , DataSet (..)
   , DataCatagory (..)
+  , DataType (..)
+  , LocationCatagory (..)
+  , Location (..)
+  , Station (..)
   ) where
 
 -- NOTE from aeson package
@@ -67,24 +71,24 @@ instance FromJSON ResultSet where
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#datasets>.
 data DataSet =
   DataSet
-    { dataSetUid          :: Maybe String
-    , dataSetId           :: String
+    { dataSetId           :: String
     , dataSetName         :: String
     , dataSetMinDate      :: Day
     , dataSetMaxDate      :: Day
     , dataSetDataCoverage :: Float
+    , dataSetUid          :: Maybe String
     } deriving (Eq, Show)
 
 instance FromJSON DataSet where
   parseJSON =
     withObject "DataSet" $ \ o ->
       DataSet
-        <$> o .:? "uid" -- missing on single item results
-        <*> o .:  "id"
+        <$> o .:  "id"
         <*> o .:  "name"
         <*> o .:  "mindate" -- ISO formatted date
         <*> o .:  "maxdate" -- ISO formatted date
         <*> o .:  "datacoverage"
+        <*> o .:? "uid" -- missing on single item results
 
 -- | Domain type for data catagories, see
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#dataCategories>.
@@ -100,3 +104,56 @@ instance FromJSON DataCatagory where
       DataCatagory
         <$> o .: "id"
         <*> o .: "name"
+
+-- | Domain type for data types, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#dataTypes>.
+data DataType =
+  DataType
+    { dataTypeId           :: String
+    , dataTypeName         :: String
+    , dataTypeMinDate      :: Day
+    , dataTypeMaxDate      :: Day
+    , dataTypeDataCoverage :: Float
+    } deriving (Eq, Show)
+
+-- TODO FromJSON instance for DataType
+
+-- | Domain type for location catagories, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locationCategories>.
+data LocationCatagory =
+  LocationCatagory
+    { locationCatagoryId   :: String
+    , locationCatagoryName :: String
+    } deriving (Eq, Show)
+
+-- TODO FromJSON instance for LocationCatagory
+
+-- | Domain type for locations, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locations>.
+data Location =
+  Location
+    { locationId :: String
+    , locationName         :: String
+    , locationMinDate      :: Day
+    , locationMaxDate      :: Day
+    , locationDataCoverage :: Float
+    } deriving (Eq, Show)
+
+-- TODO FromJSON instance for Location
+
+-- | Domain type for stations, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#stations>.
+data Station =
+  Station
+    { stationId             :: String
+    , stationName           :: String
+    , stationMinDate        :: Day
+    , stationMaxDate        :: Day
+    , stationDataCoverage   :: Float
+    , stationElevation      :: Float -- TODO replace with units of measurement type
+    , stationElevationUnits :: String -- TODO replace with units of measurement type
+    , stationLatitude       :: Float -- TODO replace with units of measurement type
+    , stationLongitude      :: Float -- TODO replace with units of measurement type
+    } deriving (Eq, Show)
+
+-- TODO FromJSON instance for Station

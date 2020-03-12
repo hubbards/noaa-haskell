@@ -2,6 +2,7 @@
 module Noaa
   ( SortOrder (..)
   , SortField (..)
+
   , DataSetsParams (..)
   , DataCatagoriesParams (..)
   , dataSetsRequest
@@ -10,9 +11,14 @@ module Noaa
   , Collection (..)
   , MetaData (..)
   , ResultSet (..)
+
   , DataSet (..)
   , DataCatagory (..)
-  , ) where
+  , DataType (..)
+  , LocationCatagory (..)
+  , Location (..)
+  , Station (..)
+  ) where
 
 import Noaa.Request
 import Noaa.Response
