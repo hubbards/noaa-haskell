@@ -27,4 +27,5 @@ This project uses [Stack][stack] to simplify dependency management.
 **TODO** test instructions
 
 [haskell]: https://www.haskell.org
+[stack]: https://www.haskellstack.org
 [noaa]: https://www.ncdc.noaa.gov/cdo-web/webservices/v2#gettingStarted
