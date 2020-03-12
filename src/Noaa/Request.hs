@@ -4,13 +4,26 @@
 module Noaa.Request
   ( SortOrder (..)
   , SortField (..)
-  , DataSetsParams (..)
-  , DataCatagoriesParams (..)
-  , defaultDataSetsParams
-  , defaultDataCatagoriesParams
+
+  , DataSetsParameters (..)
+  , DataCatagoriesParameters (..)
+  , DataTypesParameters (..)
+  , LocationCatagoriesParameters (..)
+  , LocationsParameters (..)
+  , StationsParameters (..)
+  , defaultDataSetsParameters
+  , defaultDataCatagoriesParameters
+  , defaultDataTypesParameters
+  , defaultLocationCatagoriesParameters
+  , defaultLocationsParameters
+  , defaultStationsParameters
 
   , dataSetsRequest
   , dataCatagoriesRequest
+  , dataTypesRequest
+  , locationCatagoriesRequest
+  , locationsRequest
+  , stationsRequest
   ) where
 
 -- NOTE from bytestring package
@@ -20,11 +33,9 @@ import qualified Data.ByteString.Char8 as C8
 -- NOTE from http-conduit package
 import Network.HTTP.Simple
   ( Request
-  , Response
   , Query
   , QueryItem
   , Header
-  , httpJSON
   , defaultRequest
   , setRequestHost
   , setRequestPort
@@ -64,114 +75,271 @@ instance Show SortOrder where
   show Asc  = "asc"
   show Desc = "desc"
 
--- TODO document
-data DataSetsParams =
-  DataSetsParams
-    { dataSetsParamsDataTypeId :: Maybe String
-    , dataSetsParamsLocationId :: Maybe String
-    , dataSetsParamsStationId  :: Maybe String
-    , dataSetsParamsStartDate  :: Maybe Day
-    , dataSetsParamsEndDate    :: Maybe Day
-    , dataSetsParamsSortField  :: Maybe SortField
-    , dataSetsParamsSortOrder  :: Maybe SortOrder -- default is Asc
-    , dataSetsParamsLimit      :: Maybe Int -- default is 25, max is 1000
-    , dataSetsParamsOffset     :: Maybe Int -- default is 0
+-- | Additional parameters for data sets requests, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#datasets>.
+data DataSetsParameters =
+  DataSetsParameters
+    { dataSetsParametersDataTypeId :: Maybe String
+    , dataSetsParametersLocationId :: Maybe String
+    , dataSetsParametersStationId  :: Maybe String
+    , dataSetsParametersStartDate  :: Maybe Day
+    , dataSetsParametersEndDate    :: Maybe Day
+    , dataSetsParametersSortField  :: Maybe SortField
+    , dataSetsParametersSortOrder  :: Maybe SortOrder -- default is Asc
+    , dataSetsParametersLimit      :: Maybe Int -- default is 25, max is 1000
+    , dataSetsParametersOffset     :: Maybe Int -- default is 0
+    } deriving Eq
+
+-- | Additional parameters for data catagories requests, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#dataCategories>.
+data DataCatagoriesParameters =
+  DataCatagoriesParameters
+    { dataCatagoriesParametersDataSetId  :: Maybe String
+    , dataCatagoriesParametersLocationId :: Maybe String
+    , dataCatagoriesParametersStationId  :: Maybe String
+    , dataCatagoriesParametersStartDate  :: Maybe Day
+    , dataCatagoriesParametersEndDate    :: Maybe Day
+    , dataCatagoriesParametersSortField  :: Maybe SortField
+    , dataCatagoriesParametersSortOrder  :: Maybe SortOrder -- default is Asc
+    , dataCatagoriesParametersLimit      :: Maybe Int -- default is 25, max is 1000
+    , dataCatagoriesParametersOffset     :: Maybe Int -- default is 0
+    } deriving Eq
+
+-- | Additional parameters for data types requests, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#dataTypes>.
+data DataTypesParameters =
+  DataTypesParameters
+    { dataTypesParametersDataSetId      :: Maybe String
+    , dataTypesParametersLocationId     :: Maybe String
+    , dataTypesParametersStationId      :: Maybe String
+    , dataTypesParametersDataCatagoryId :: Maybe String
+    , dataTypesParametersStartDate      :: Maybe Day
+    , dataTypesParametersEndDate        :: Maybe Day
+    , dataTypesParametersSortField      :: Maybe SortField
+    , dataTypesParametersSortOrder      :: Maybe SortOrder -- default is Asc
+    , dataTypesParametersLimit          :: Maybe Int -- default is 25, max is 1000
+    , dataTypesParametersOffset         :: Maybe Int -- default is 0
+    } deriving Eq
+
+-- | Additional parameters for location catagories requests, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locationCatagories>.
+data LocationCatagoriesParameters =
+  LocationCatagoryParameters
+    { locationCatagoriesParametersDataSetId :: Maybe String
+    , locationCatagoriesParametersStartDate :: Maybe Day
+    , locationCatagoriesParametersEndDate   :: Maybe Day
+    , locationCatagoriesParametersSortField :: Maybe SortField
+    , locationCatagoriesParametersSortOrder :: Maybe SortOrder -- default is Asc
+    , locationCatagoriesParametersLimit     :: Maybe Int -- default is 25, max is 1000
+    , locationCatagoriesParametersOffset    :: Maybe Int -- default is 0
+    } deriving Eq
+
+-- | Additional parameters for locations requests, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locations>.
+data LocationsParameters =
+  LocationParameters
+    { locationsParametersDataSetId          :: Maybe String
+    , locationsParametersDataCatagoryId     :: Maybe String
+    , locationsParametersLocationCatagoryId :: Maybe String
+    , locationsParametersStartDate          :: Maybe Day
+    , locationsParametersEndDate            :: Maybe Day
+    , locationsParametersSortField          :: Maybe SortField
+    , locationsParametersSortOrder          :: Maybe SortOrder -- default is Asc
+    , locationsParametersLimit              :: Maybe Int -- default is 25, max is 1000
+    , locationsParametersOffset             :: Maybe Int -- default is 0
+    } deriving Eq
+
+-- | Additional parameters for stations requests, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#stations>.
+-- TODO replace 'stationsParametersExtent'
+data StationsParameters =
+  StationParameters
+    { stationsParametersDataSetId      :: Maybe String
+    , stationsParametersDataCatagoryId :: Maybe String
+    , stationsParametersDataTypeId     :: Maybe String
+    , stationsParametersExtent         :: Maybe String
+    , stationsParametersStartDate      :: Maybe Day
+    , stationsParametersEndDate        :: Maybe Day
+    , stationsParametersSortField      :: Maybe SortField
+    , stationsParametersSortOrder      :: Maybe SortOrder -- default is Asc
+    , stationsParametersLimit          :: Maybe Int -- default is 25, max is 1000
+    , stationsParametersOffset         :: Maybe Int -- default is 0
     } deriving Eq
 
 -- TODO document
-data DataCatagoriesParams =
-  DataCatagoriesParams
-    { dataCatagoriesParamsDataSetId  :: Maybe String
-    , dataCatagoriesParamsLocationId :: Maybe String
-    , dataCatagoriesParamsStationId  :: Maybe String
-    , dataCatagoriesParamsStartDate  :: Maybe Day
-    , dataCatagoriesParamsEndDate    :: Maybe Day
-    , dataCatagoriesParamsSortField  :: Maybe SortField
-    , dataCatagoriesParamsSortOrder  :: Maybe SortOrder -- default is Asc
-    , dataCatagoriesParamsLimit      :: Maybe Int -- default is 25, max is 1000
-    , dataCatagoriesParamsOffset     :: Maybe Int -- default is 0
-    } deriving Eq
-
--- TODO document
-defaultDataSetsParams :: DataSetsParams
-defaultDataSetsParams =
-  DataSetsParams
-    { dataSetsParamsDataTypeId = Nothing
-    , dataSetsParamsLocationId = Nothing
-    , dataSetsParamsStationId  = Nothing
-    , dataSetsParamsStartDate  = Nothing
-    , dataSetsParamsEndDate    = Nothing
-    , dataSetsParamsSortField  = Nothing
-    , dataSetsParamsSortOrder  = Nothing
-    , dataSetsParamsLimit      = Nothing
-    , dataSetsParamsOffset     = Nothing
+defaultDataSetsParameters :: DataSetsParameters
+defaultDataSetsParameters =
+  DataSetsParameters
+    { dataSetsParametersDataTypeId = Nothing
+    , dataSetsParametersLocationId = Nothing
+    , dataSetsParametersStationId  = Nothing
+    , dataSetsParametersStartDate  = Nothing
+    , dataSetsParametersEndDate    = Nothing
+    , dataSetsParametersSortField  = Nothing
+    , dataSetsParametersSortOrder  = Nothing
+    , dataSetsParametersLimit      = Nothing
+    , dataSetsParametersOffset     = Nothing
     }
 
 -- TODO document
-defaultDataCatagoriesParams :: DataCatagoriesParams
-defaultDataCatagoriesParams =
-  DataCatagoriesParams
-    { dataCatagoriesParamsDataSetId  = Nothing
-    , dataCatagoriesParamsLocationId = Nothing
-    , dataCatagoriesParamsStationId  = Nothing
-    , dataCatagoriesParamsStartDate  = Nothing
-    , dataCatagoriesParamsEndDate    = Nothing
-    , dataCatagoriesParamsSortField  = Nothing
-    , dataCatagoriesParamsSortOrder  = Nothing
-    , dataCatagoriesParamsLimit      = Nothing
-    , dataCatagoriesParamsOffset     = Nothing
+defaultDataCatagoriesParameters :: DataCatagoriesParameters
+defaultDataCatagoriesParameters =
+  DataCatagoriesParameters
+    { dataCatagoriesParametersDataSetId  = Nothing
+    , dataCatagoriesParametersLocationId = Nothing
+    , dataCatagoriesParametersStationId  = Nothing
+    , dataCatagoriesParametersStartDate  = Nothing
+    , dataCatagoriesParametersEndDate    = Nothing
+    , dataCatagoriesParametersSortField  = Nothing
+    , dataCatagoriesParametersSortOrder  = Nothing
+    , dataCatagoriesParametersLimit      = Nothing
+    , dataCatagoriesParametersOffset     = Nothing
     }
 
--- TODO rewrite
+-- TODO document
+defaultDataTypesParameters :: DataTypesParameters
+defaultDataTypesParameters =
+  DataTypesParameters
+    { dataTypesParametersDataSetId      = Nothing
+    , dataTypesParametersLocationId     = Nothing
+    , dataTypesParametersStationId      = Nothing
+    , dataTypesParametersDataCatagoryId = Nothing
+    , dataTypesParametersStartDate      = Nothing
+    , dataTypesParametersEndDate        = Nothing
+    , dataTypesParametersSortField      = Nothing
+    , dataTypesParametersSortOrder      = Nothing
+    , dataTypesParametersLimit          = Nothing
+    , dataTypesParametersOffset         = Nothing
+    }
+
+-- TODO document
+defaultLocationCatagoriesParameters :: LocationCatagoriesParameters
+defaultLocationCatagoriesParameters =
+  LocationCatagoryParameters
+    { locationCatagoriesParametersDataSetId = Nothing
+    , locationCatagoriesParametersStartDate = Nothing
+    , locationCatagoriesParametersEndDate   = Nothing
+    , locationCatagoriesParametersSortField = Nothing
+    , locationCatagoriesParametersSortOrder = Nothing
+    , locationCatagoriesParametersLimit     = Nothing
+    , locationCatagoriesParametersOffset    = Nothing
+    }
+
+-- TODO document
+defaultLocationsParameters :: LocationsParameters
+defaultLocationsParameters =
+  LocationParameters
+    { locationsParametersDataSetId          = Nothing
+    , locationsParametersDataCatagoryId     = Nothing
+    , locationsParametersLocationCatagoryId = Nothing
+    , locationsParametersStartDate          = Nothing
+    , locationsParametersEndDate            = Nothing
+    , locationsParametersSortField          = Nothing
+    , locationsParametersSortOrder          = Nothing
+    , locationsParametersLimit              = Nothing
+    , locationsParametersOffset             = Nothing
+    }
+
+-- TODO document
+defaultStationsParameters :: StationsParameters
+defaultStationsParameters =
+  StationParameters
+    { stationsParametersDataSetId      = Nothing
+    , stationsParametersDataCatagoryId = Nothing
+    , stationsParametersDataTypeId     = Nothing
+    , stationsParametersExtent         = Nothing
+    , stationsParametersStartDate      = Nothing
+    , stationsParametersEndDate        = Nothing
+    , stationsParametersSortField      = Nothing
+    , stationsParametersSortOrder      = Nothing
+    , stationsParametersLimit          = Nothing
+    , stationsParametersOffset         = Nothing
+    }
+
 buildQueryItem :: Show a => B.ByteString -> a -> QueryItem
 buildQueryItem name value =
   (name, Just . C8.pack . show $ value)
 
--- TODO rewrite
-dataSetsParamsQuery :: DataSetsParams -> Query
-dataSetsParamsQuery params =
+-- TODO use http-types package
+dataSetsQuery :: DataSetsParameters -> Query
+dataSetsQuery params =
   catMaybes
-    [ fmap (buildQueryItem "datatypeid") (dataSetsParamsDataTypeId params)
-    , fmap (buildQueryItem "locationid") (dataSetsParamsLocationId params)
-    , fmap (buildQueryItem "stationid") (dataSetsParamsStationId params)
-    , fmap (buildQueryItem "startdate") (dataSetsParamsStartDate params)
-    , fmap (buildQueryItem "enddate") (dataSetsParamsEndDate params)
-    , fmap (buildQueryItem "sortfield") (dataSetsParamsSortField params)
-    , fmap (buildQueryItem "sortorder") (dataSetsParamsSortOrder params)
-    , fmap (buildQueryItem "limit") (dataSetsParamsLimit params)
-    , fmap (buildQueryItem "offset") (dataSetsParamsOffset params)
+    [ buildQueryItem "datatypeid" <$> dataSetsParametersDataTypeId params
+    , buildQueryItem "locationid" <$> dataSetsParametersLocationId params
+    , buildQueryItem "stationid"  <$> dataSetsParametersStationId params
+    , buildQueryItem "startdate"  <$> dataSetsParametersStartDate params
+    , buildQueryItem "enddate"    <$> dataSetsParametersEndDate params
+    , buildQueryItem "sortfield"  <$> dataSetsParametersSortField params
+    , buildQueryItem "sortorder"  <$> dataSetsParametersSortOrder params
+    , buildQueryItem "limit"      <$> dataSetsParametersLimit params
+    , buildQueryItem "offset"     <$> dataSetsParametersOffset params
     ]
 
--- TODO rewrite
-dataCatagoriesParamsQuery :: DataCatagoriesParams -> Query
-dataCatagoriesParamsQuery params =
+-- TODO use http-types package
+dataCatagoriesQuery :: DataCatagoriesParameters -> Query
+dataCatagoriesQuery params =
   catMaybes
-    [ fmap (buildQueryItem "datasetid") (dataCatagoriesParamsDataSetId params)
-    , fmap (buildQueryItem "locationid") (dataCatagoriesParamsLocationId params)
-    , fmap (buildQueryItem "stationid") (dataCatagoriesParamsStationId params)
-    , fmap (buildQueryItem "startdate") (dataCatagoriesParamsStartDate params)
-    , fmap (buildQueryItem "enddate") (dataCatagoriesParamsEndDate params)
-    , fmap (buildQueryItem "sortfield") (dataCatagoriesParamsSortField params)
-    , fmap (buildQueryItem "sortorder") (dataCatagoriesParamsSortOrder params)
-    , fmap (buildQueryItem "limit") (dataCatagoriesParamsLimit params)
-    , fmap (buildQueryItem "offset") (dataCatagoriesParamsOffset params)
+    [ buildQueryItem "datasetid"  <$> dataCatagoriesParametersDataSetId params
+    , buildQueryItem "locationid" <$> dataCatagoriesParametersLocationId params
+    , buildQueryItem "stationid"  <$> dataCatagoriesParametersStationId params
+    , buildQueryItem "startdate"  <$> dataCatagoriesParametersStartDate params
+    , buildQueryItem "enddate"    <$> dataCatagoriesParametersEndDate params
+    , buildQueryItem "sortfield"  <$> dataCatagoriesParametersSortField params
+    , buildQueryItem "sortorder"  <$> dataCatagoriesParametersSortOrder params
+    , buildQueryItem "limit"      <$> dataCatagoriesParametersLimit params
+    , buildQueryItem "offset"     <$> dataCatagoriesParametersOffset params
     ]
+
+dataTypesQuery :: DataTypesParameters -> Query
+dataTypesQuery params = undefined
+
+locationCatagoriesQuery :: LocationCatagoriesParameters -> Query
+locationCatagoriesQuery params = undefined
+
+locationsQuery :: LocationsParameters -> Query
+locationsQuery params = undefined
+
+stationsQuery :: StationsParameters -> Query
+stationsQuery params = undefined
 
 noaaHost :: B.ByteString
 noaaHost =
   "www.ncdc.noaa.gov"
 
+-- TODO use http-types package
 noaaPath :: B.ByteString
 noaaPath =
   "/cdo-web/api/v2"
 
+-- TODO use http-types package
 dataSetsPath :: B.ByteString
 dataSetsPath =
   noaaPath `B.append` "/datasets"
 
+-- TODO use http-types package
 dataCatagoriesPath :: B.ByteString
 dataCatagoriesPath =
   noaaPath `B.append` "/datacategories"
+
+-- TODO use http-types package
+dataTypesPath :: B.ByteString
+dataTypesPath =
+  noaaPath `B.append` "/datatypes"
+
+-- TODO use http-types package
+locationCatagoriesPath :: B.ByteString
+locationCatagoriesPath =
+  noaaPath `B.append` "/locationcategories"
+
+-- TODO use http-types package
+locationsPath :: B.ByteString
+locationsPath =
+  noaaPath `B.append` "/locations"
+
+-- TODO use http-types package
+stationsPath :: B.ByteString
+stationsPath =
+  noaaPath `B.append` "/stations"
 
 defaultNoaaRequest :: B.ByteString -> Request
 defaultNoaaRequest token =
@@ -181,25 +349,43 @@ defaultNoaaRequest token =
   $ defaultRequest
 
 -- TODO document
-dataSetsRequest :: B.ByteString -> DataSetsParams -> Request
+dataSetsRequest :: B.ByteString -> DataSetsParameters -> Request
 dataSetsRequest token params =
     setRequestPath dataSetsPath
-  . setRequestQueryString (dataSetsParamsQuery params)
+  . setRequestQueryString (dataSetsQuery params)
   $ defaultNoaaRequest token
-
--- getDataSets :: String -> DataSetsParams
---                       -> IO (Response (Collection DataSet))
--- getDataSets token params =
---   httpJSON (dataSetsRequest token params)
 
 -- TODO document
-dataCatagoriesRequest :: B.ByteString -> DataCatagoriesParams -> Request
+dataCatagoriesRequest :: B.ByteString -> DataCatagoriesParameters -> Request
 dataCatagoriesRequest token params =
     setRequestPath dataCatagoriesPath
-  . setRequestQueryString (dataCatagoriesParamsQuery params)
+  . setRequestQueryString (dataCatagoriesQuery params)
   $ defaultNoaaRequest token
 
--- getDataCatagories :: String -> DataCatagoriesParams
---                             -> IO (Response (Collection DataCatagory))
--- getDataCatagories token params =
---   httpJSON (dataCatagoriesRequest token params)
+-- TODO document
+dataTypesRequest :: B.ByteString -> DataTypesParameters -> Request
+dataTypesRequest token params =
+    setRequestPath dataTypesPath
+  . setRequestQueryString (dataTypesQuery params)
+  $ defaultNoaaRequest token
+
+-- TODO document
+locationCatagoriesRequest :: B.ByteString -> LocationCatagoriesParameters -> Request
+locationCatagoriesRequest token params =
+    setRequestPath locationCatagoriesPath
+  . setRequestQueryString (locationCatagoriesQuery params)
+  $ defaultNoaaRequest token
+
+-- TODO document
+locationsRequest :: B.ByteString -> LocationsParameters -> Request
+locationsRequest token params =
+    setRequestPath locationsPath
+  . setRequestQueryString (locationsQuery params)
+  $ defaultNoaaRequest token
+
+-- TODO document
+stationsRequest :: B.ByteString -> StationsParameters -> Request
+stationsRequest token params =
+    setRequestPath stationsPath
+  . setRequestQueryString (stationsQuery params)
+  $ defaultNoaaRequest token
