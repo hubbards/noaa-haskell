@@ -164,6 +164,8 @@ instance FromJSON Location where
 
 -- | Domain type for stations, see
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#stations>.
+-- TODO replace 'stationElevation' and 'stationElevationUnits'
+-- TODO replace 'stationLatitude' and 'stationLongitude'
 data Station =
   Station
     { stationId             :: String
@@ -171,14 +173,12 @@ data Station =
     , stationMinDate        :: Day
     , stationMaxDate        :: Day
     , stationDataCoverage   :: Float
-    -- TODO replace with units of measurement
     , stationElevation      :: Float
     , stationElevationUnits :: String
     , stationLatitude       :: Float
     , stationLongitude      :: Float
     } deriving (Eq, Show)
 
--- TODO implement
 instance FromJSON Station where
   parseJSON =
     withObject "Station" $ \ o ->
