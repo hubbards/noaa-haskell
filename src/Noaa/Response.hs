@@ -116,7 +116,15 @@ data DataType =
     , dataTypeDataCoverage :: Float
     } deriving (Eq, Show)
 
--- TODO FromJSON instance for DataType
+instance FromJSON DataType where
+  parseJSON =
+    withObject "DataType" $ \ o ->
+      DataType
+        <$> o .:  "id"
+        <*> o .:  "name"
+        <*> o .:  "mindate" -- ISO formatted date
+        <*> o .:  "maxdate" -- ISO formatted date
+        <*> o .:  "datacoverage"
 
 -- | Domain type for location catagories, see
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locationCategories>.
@@ -126,7 +134,12 @@ data LocationCatagory =
     , locationCatagoryName :: String
     } deriving (Eq, Show)
 
--- TODO FromJSON instance for LocationCatagory
+instance FromJSON LocationCatagory where
+  parseJSON =
+    withObject "LocationCatagory" $ \ o ->
+      LocationCatagory
+        <$> o .: "id"
+        <*> o .: "name"
 
 -- | Domain type for locations, see
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locations>.
@@ -139,7 +152,15 @@ data Location =
     , locationDataCoverage :: Float
     } deriving (Eq, Show)
 
--- TODO FromJSON instance for Location
+instance FromJSON Location where
+  parseJSON =
+    withObject "Location" $ \ o ->
+      Location
+        <$> o .:  "id"
+        <*> o .:  "name"
+        <*> o .:  "mindate" -- ISO formatted date
+        <*> o .:  "maxdate" -- ISO formatted date
+        <*> o .:  "datacoverage"
 
 -- | Domain type for stations, see
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#stations>.
@@ -150,10 +171,11 @@ data Station =
     , stationMinDate        :: Day
     , stationMaxDate        :: Day
     , stationDataCoverage   :: Float
-    , stationElevation      :: Float -- TODO replace with units of measurement type
-    , stationElevationUnits :: String -- TODO replace with units of measurement type
-    , stationLatitude       :: Float -- TODO replace with units of measurement type
-    , stationLongitude      :: Float -- TODO replace with units of measurement type
+    -- TODO replace with units of measurement
+    , stationElevation      :: Length Float
+    , stationElevationUnits :: String
+    , stationLatitude       :: Float
+    , stationLongitude      :: Float
     } deriving (Eq, Show)
 
 -- TODO FromJSON instance for Station
