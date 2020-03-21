@@ -20,12 +20,19 @@ This project uses [Stack][stack] to simplify dependency management.
 
 ### Build
 
-**TODO** build instructions
+Build the project with the command `stack build`. Build the documentation for
+the project with the command `stack haddock`.
 
 ### Test
 
-**TODO** test instructions
+Test the project with the command `stack test`.
+
+### Lint
+
+If [HLint][hlint] is on the local path, then lint the project with the command
+`hlint .`.
 
 [haskell]: https://www.haskell.org
 [stack]: https://www.haskellstack.org
+[hlint]: https://github.com/ndmitchell/hlint
 [noaa]: https://www.ncdc.noaa.gov/cdo-web/webservices/v2#gettingStarted
