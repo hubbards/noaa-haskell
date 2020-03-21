@@ -29,13 +29,12 @@ module Noaa.Request
 -- NOTE from bytestring package
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C8
+import Data.ByteString.Lazy (toStrict)
+import Data.ByteString.Builder (toLazyByteString)
 
 -- NOTE from http-conduit package
 import Network.HTTP.Simple
   ( Request
-  , Query
-  , QueryItem
-  , Header
   , defaultRequest
   , setRequestHost
   , setRequestPort
@@ -45,6 +44,20 @@ import Network.HTTP.Simple
   , setRequestSecure
   , setRequestQueryString
   )
+
+-- NOTE from http-types package
+import Network.HTTP.Types.Header (Header)
+import Network.HTTP.Types.QueryLike (QueryLike (toQuery))
+import Network.HTTP.Types.URI
+  ( Query
+  , QueryItem
+  , SimpleQuery
+  , SimpleQueryItem
+  , encodePathSegments
+  )
+
+-- NOTE from text package
+import Data.Text (Text)
 
 -- NOTE from time package
 import Data.Time.Calendar (Day)
@@ -124,7 +137,7 @@ data DataTypesParameters =
 -- | Additional parameters for location catagories requests, see
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locationCatagories>.
 data LocationCatagoriesParameters =
-  LocationCatagoryParameters
+  LocationCatagoriesParameters
     { locationCatagoriesParametersDataSetId :: Maybe String
     , locationCatagoriesParametersStartDate :: Maybe Day
     , locationCatagoriesParametersEndDate   :: Maybe Day
@@ -137,7 +150,7 @@ data LocationCatagoriesParameters =
 -- | Additional parameters for locations requests, see
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#locations>.
 data LocationsParameters =
-  LocationParameters
+  LocationsParameters
     { locationsParametersDataSetId          :: Maybe String
     , locationsParametersDataCatagoryId     :: Maybe String
     , locationsParametersLocationCatagoryId :: Maybe String
@@ -153,7 +166,7 @@ data LocationsParameters =
 -- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#stations>.
 -- TODO replace 'stationsParametersExtent'
 data StationsParameters =
-  StationParameters
+  StationsParameters
     { stationsParametersDataSetId      :: Maybe String
     , stationsParametersDataCatagoryId :: Maybe String
     , stationsParametersDataTypeId     :: Maybe String
@@ -215,7 +228,7 @@ defaultDataTypesParameters =
 -- TODO document
 defaultLocationCatagoriesParameters :: LocationCatagoriesParameters
 defaultLocationCatagoriesParameters =
-  LocationCatagoryParameters
+  LocationCatagoriesParameters
     { locationCatagoriesParametersDataSetId = Nothing
     , locationCatagoriesParametersStartDate = Nothing
     , locationCatagoriesParametersEndDate   = Nothing
@@ -228,7 +241,7 @@ defaultLocationCatagoriesParameters =
 -- TODO document
 defaultLocationsParameters :: LocationsParameters
 defaultLocationsParameters =
-  LocationParameters
+  LocationsParameters
     { locationsParametersDataSetId          = Nothing
     , locationsParametersDataCatagoryId     = Nothing
     , locationsParametersLocationCatagoryId = Nothing
@@ -243,7 +256,7 @@ defaultLocationsParameters =
 -- TODO document
 defaultStationsParameters :: StationsParameters
 defaultStationsParameters =
-  StationParameters
+  StationsParameters
     { stationsParametersDataSetId      = Nothing
     , stationsParametersDataCatagoryId = Nothing
     , stationsParametersDataTypeId     = Nothing
@@ -260,132 +273,120 @@ buildQueryItem :: Show a => B.ByteString -> a -> QueryItem
 buildQueryItem name value =
   (name, Just . C8.pack . show $ value)
 
--- TODO use http-types package
-dataSetsQuery :: DataSetsParameters -> Query
-dataSetsQuery params =
-  catMaybes
-    [ buildQueryItem "datatypeid" <$> dataSetsParametersDataTypeId params
-    , buildQueryItem "locationid" <$> dataSetsParametersLocationId params
-    , buildQueryItem "stationid"  <$> dataSetsParametersStationId params
-    , buildQueryItem "startdate"  <$> dataSetsParametersStartDate params
-    , buildQueryItem "enddate"    <$> dataSetsParametersEndDate params
-    , buildQueryItem "sortfield"  <$> dataSetsParametersSortField params
-    , buildQueryItem "sortorder"  <$> dataSetsParametersSortOrder params
-    , buildQueryItem "limit"      <$> dataSetsParametersLimit params
-    , buildQueryItem "offset"     <$> dataSetsParametersOffset params
-    ]
+instance QueryLike DataSetsParameters where
+  toQuery params =
+    catMaybes
+      [ buildQueryItem "datatypeid" <$> dataSetsParametersDataTypeId params
+      , buildQueryItem "locationid" <$> dataSetsParametersLocationId params
+      , buildQueryItem "stationid"  <$> dataSetsParametersStationId params
+      , buildQueryItem "startdate"  <$> dataSetsParametersStartDate params
+      , buildQueryItem "enddate"    <$> dataSetsParametersEndDate params
+      , buildQueryItem "sortfield"  <$> dataSetsParametersSortField params
+      , buildQueryItem "sortorder"  <$> dataSetsParametersSortOrder params
+      , buildQueryItem "limit"      <$> dataSetsParametersLimit params
+      , buildQueryItem "offset"     <$> dataSetsParametersOffset params
+      ]
 
--- TODO use http-types package
-dataCatagoriesQuery :: DataCatagoriesParameters -> Query
-dataCatagoriesQuery params =
-  catMaybes
-    [ buildQueryItem "datasetid"  <$> dataCatagoriesParametersDataSetId params
-    , buildQueryItem "locationid" <$> dataCatagoriesParametersLocationId params
-    , buildQueryItem "stationid"  <$> dataCatagoriesParametersStationId params
-    , buildQueryItem "startdate"  <$> dataCatagoriesParametersStartDate params
-    , buildQueryItem "enddate"    <$> dataCatagoriesParametersEndDate params
-    , buildQueryItem "sortfield"  <$> dataCatagoriesParametersSortField params
-    , buildQueryItem "sortorder"  <$> dataCatagoriesParametersSortOrder params
-    , buildQueryItem "limit"      <$> dataCatagoriesParametersLimit params
-    , buildQueryItem "offset"     <$> dataCatagoriesParametersOffset params
-    ]
+instance QueryLike DataCatagoriesParameters where
+  toQuery params =
+    catMaybes
+      [ buildQueryItem "datasetid"  <$> dataCatagoriesParametersDataSetId params
+      , buildQueryItem "locationid" <$> dataCatagoriesParametersLocationId params
+      , buildQueryItem "stationid"  <$> dataCatagoriesParametersStationId params
+      , buildQueryItem "startdate"  <$> dataCatagoriesParametersStartDate params
+      , buildQueryItem "enddate"    <$> dataCatagoriesParametersEndDate params
+      , buildQueryItem "sortfield"  <$> dataCatagoriesParametersSortField params
+      , buildQueryItem "sortorder"  <$> dataCatagoriesParametersSortOrder params
+      , buildQueryItem "limit"      <$> dataCatagoriesParametersLimit params
+      , buildQueryItem "offset"     <$> dataCatagoriesParametersOffset params
+      ]
 
-dataTypesQuery :: DataTypesParameters -> Query
-dataTypesQuery params = undefined
+-- TODO implement
+instance QueryLike DataTypesParameters where
+  toQuery params = undefined
 
-locationCatagoriesQuery :: LocationCatagoriesParameters -> Query
-locationCatagoriesQuery params = undefined
+-- TODO implement
+instance QueryLike LocationCatagoriesParameters where
+  toQuery params = undefined
 
-locationsQuery :: LocationsParameters -> Query
-locationsQuery params = undefined
+-- TODO implement
+instance QueryLike LocationsParameters where
+  toQuery params = undefined
 
-stationsQuery :: StationsParameters -> Query
-stationsQuery params = undefined
+-- TODO implement
+instance QueryLike StationsParameters where
+  toQuery params = undefined
 
 noaaHost :: B.ByteString
 noaaHost =
   "www.ncdc.noaa.gov"
 
--- TODO use http-types package
-noaaPath :: B.ByteString
+noaaPath :: [Text]
 noaaPath =
-  "/cdo-web/api/v2"
+  [ "cdo-web"
+  , "api"
+  , "v2"
+  ]
 
--- TODO use http-types package
-dataSetsPath :: B.ByteString
+dataSetsPath :: [Text]
 dataSetsPath =
-  noaaPath `B.append` "/datasets"
+  noaaPath ++ ["datasets"]
 
--- TODO use http-types package
-dataCatagoriesPath :: B.ByteString
+dataCatagoriesPath :: [Text]
 dataCatagoriesPath =
-  noaaPath `B.append` "/datacategories"
+  noaaPath ++ ["datacategories"]
 
--- TODO use http-types package
-dataTypesPath :: B.ByteString
+dataTypesPath :: [Text]
 dataTypesPath =
-  noaaPath `B.append` "/datatypes"
+  noaaPath ++ ["datatypes"]
 
--- TODO use http-types package
-locationCatagoriesPath :: B.ByteString
+locationCatagoriesPath :: [Text]
 locationCatagoriesPath =
-  noaaPath `B.append` "/locationcategories"
+  noaaPath ++ ["locationcategories"]
 
--- TODO use http-types package
-locationsPath :: B.ByteString
+locationsPath :: [Text]
 locationsPath =
-  noaaPath `B.append` "/locations"
+  noaaPath ++ ["locations"]
 
--- TODO use http-types package
-stationsPath :: B.ByteString
+stationsPath :: [Text]
 stationsPath =
-  noaaPath `B.append` "/stations"
+  noaaPath ++ ["stations"]
 
-defaultNoaaRequest :: B.ByteString -> Request
-defaultNoaaRequest token =
+defaultNoaaRequest :: QueryLike a => B.ByteString -> [Text] -> a -> Request
+defaultNoaaRequest token path params =
     setRequestSecure True
   . setRequestHost noaaHost
   . setRequestHeader "token" [token]
+  . setRequestPath (toStrict . toLazyByteString . encodePathSegments $ path)
+  . setRequestQueryString (toQuery params)
   $ defaultRequest
 
 -- TODO document
 dataSetsRequest :: B.ByteString -> DataSetsParameters -> Request
-dataSetsRequest token params =
-    setRequestPath dataSetsPath
-  . setRequestQueryString (dataSetsQuery params)
-  $ defaultNoaaRequest token
+dataSetsRequest =
+  flip defaultNoaaRequest dataSetsPath
 
 -- TODO document
 dataCatagoriesRequest :: B.ByteString -> DataCatagoriesParameters -> Request
-dataCatagoriesRequest token params =
-    setRequestPath dataCatagoriesPath
-  . setRequestQueryString (dataCatagoriesQuery params)
-  $ defaultNoaaRequest token
+dataCatagoriesRequest =
+  flip defaultNoaaRequest dataCatagoriesPath
 
 -- TODO document
 dataTypesRequest :: B.ByteString -> DataTypesParameters -> Request
-dataTypesRequest token params =
-    setRequestPath dataTypesPath
-  . setRequestQueryString (dataTypesQuery params)
-  $ defaultNoaaRequest token
+dataTypesRequest =
+  flip defaultNoaaRequest dataTypesPath
 
 -- TODO document
 locationCatagoriesRequest :: B.ByteString -> LocationCatagoriesParameters -> Request
-locationCatagoriesRequest token params =
-    setRequestPath locationCatagoriesPath
-  . setRequestQueryString (locationCatagoriesQuery params)
-  $ defaultNoaaRequest token
+locationCatagoriesRequest =
+  flip defaultNoaaRequest locationCatagoriesPath
 
 -- TODO document
 locationsRequest :: B.ByteString -> LocationsParameters -> Request
-locationsRequest token params =
-    setRequestPath locationsPath
-  . setRequestQueryString (locationsQuery params)
-  $ defaultNoaaRequest token
+locationsRequest =
+  flip defaultNoaaRequest locationsPath
 
 -- TODO document
 stationsRequest :: B.ByteString -> StationsParameters -> Request
-stationsRequest token params =
-    setRequestPath stationsPath
-  . setRequestQueryString (stationsQuery params)
-  $ defaultNoaaRequest token
+stationsRequest =
+  flip defaultNoaaRequest stationsPath
