@@ -352,41 +352,45 @@ stationsPath :: [Text]
 stationsPath =
   noaaPath ++ ["stations"]
 
-defaultNoaaRequest :: QueryLike a => B.ByteString -> [Text] -> a -> Request
-defaultNoaaRequest token path params =
+defaultNoaaRequest :: B.ByteString -> Request
+defaultNoaaRequest token =
     setRequestSecure True
   . setRequestHost noaaHost
   . setRequestHeader "token" [token]
-  . setRequestPath (toStrict . toLazyByteString . encodePathSegments $ path)
-  . setRequestQueryString (toQuery params)
   $ defaultRequest
+
+noaaRequest :: QueryLike a => B.ByteString -> [Text] -> a -> Request
+noaaRequest token path params =
+    setRequestPath (toStrict . toLazyByteString . encodePathSegments $ path)
+  . setRequestQueryString (toQuery params)
+  $ defaultNoaaRequest token
 
 -- TODO document
 dataSetsRequest :: B.ByteString -> DataSetsParameters -> Request
 dataSetsRequest =
-  flip defaultNoaaRequest dataSetsPath
+  flip noaaRequest dataSetsPath
 
 -- TODO document
 dataCatagoriesRequest :: B.ByteString -> DataCatagoriesParameters -> Request
 dataCatagoriesRequest =
-  flip defaultNoaaRequest dataCatagoriesPath
+  flip noaaRequest dataCatagoriesPath
 
 -- TODO document
 dataTypesRequest :: B.ByteString -> DataTypesParameters -> Request
 dataTypesRequest =
-  flip defaultNoaaRequest dataTypesPath
+  flip noaaRequest dataTypesPath
 
 -- TODO document
 locationCatagoriesRequest :: B.ByteString -> LocationCatagoriesParameters -> Request
 locationCatagoriesRequest =
-  flip defaultNoaaRequest locationCatagoriesPath
+  flip noaaRequest locationCatagoriesPath
 
 -- TODO document
 locationsRequest :: B.ByteString -> LocationsParameters -> Request
 locationsRequest =
-  flip defaultNoaaRequest locationsPath
+  flip noaaRequest locationsPath
 
 -- TODO document
 stationsRequest :: B.ByteString -> StationsParameters -> Request
 stationsRequest =
-  flip defaultNoaaRequest stationsPath
+  flip noaaRequest stationsPath
