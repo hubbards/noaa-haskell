@@ -55,6 +55,10 @@ tests =
     , decode station2'           ~?= Just station2
     , decode station3'           ~?= Just station3
     , decode stations'           ~?= Just stations
+    , decode data1'              ~?= Just data1
+    , decode data2'              ~?= Just data2
+    , decode data3'              ~?= Just data3
+    , decode datas'              ~?= Just datas
     ]
 
 
@@ -669,6 +673,111 @@ stations' =
 \      , \"elevationUnit\": \"METERS\" \
 \      , \"latitude\":      35.5954 \
 \      , \"longitude\":     -82.5568 \
+\      } \
+\    ] \
+\  }"
+
+data1 :: Data
+data1 =
+  Data
+    { dataDate       = fromJust (iso8601ParseM "2010-05-01T00:00:00")
+    , dataDataType   = "TMAX"
+    , dataStation    = "GHCND:USW00013872"
+    , dataAttributes = ",,0,2400"
+    , dataValue      = 267
+    }
+
+data2 :: Data
+data2 =
+  Data
+    { dataDate       = fromJust (iso8601ParseM "2010-05-01T00:00:00")
+    , dataDataType   = "TMIN"
+    , dataStation    = "GHCND:USW00013872"
+    , dataAttributes = ",,0,2400"
+    , dataValue      = 139
+    }
+
+data3 :: Data
+data3 =
+  Data
+    { dataDate       = fromJust (iso8601ParseM "2010-05-01T00:00:00")
+    , dataDataType   = "TOBS"
+    , dataStation    = "GHCND:USW00013872"
+    , dataAttributes = ",,0,2400"
+    , dataValue      = 206
+    }
+
+datas :: Collection Data
+datas =
+  Collection
+    { collectionMetaData =
+        MetaData $ ResultSet
+          { resultSetLimit  = 5
+          , resultSetOffset = 1
+          , resultSetCount  = 3
+          }
+    , collectionResults  =
+      [ data1
+      , data2
+      , data3
+      ]
+    }
+
+data1' :: B.ByteString
+data1' =
+  "{ \"date\":       \"2010-05-01T00:00:00\" \
+\  , \"datatype\":   \"TMAX\" \
+\  , \"station\":    \"GHCND:USW00013872\" \
+\  , \"attributes\": \",,0,2400\" \
+\  , \"value\":      267 \
+\ }"
+
+data2' :: B.ByteString
+data2' =
+  "{ \"date\":       \"2010-05-01T00:00:00\" \
+\  , \"datatype\":   \"TMIN\" \
+\  , \"station\":    \"GHCND:USW00013872\" \
+\  , \"attributes\": \",,0,2400\" \
+\  , \"value\":      139 \
+\ }"
+
+data3' :: B.ByteString
+data3' =
+  "{ \"date\":       \"2010-05-01T00:00:00\" \
+\  , \"datatype\":   \"TOBS\" \
+\  , \"station\":    \"GHCND:USW00013872\" \
+\  , \"attributes\": \",,0,2400\" \
+\  , \"value\":      206 \
+\ }"
+
+datas' :: B.ByteString
+datas' =
+  "{ \"metadata\": \
+\    { \"resultset\": \
+\      { \"offset\": 1 \
+\      , \"count\":  3 \
+\      , \"limit\":  5 \
+\      } \
+\    } \
+\  , \"results\": \
+\    [ \
+\      { \"date\":       \"2010-05-01T00:00:00\" \
+\      , \"datatype\":   \"TMAX\" \
+\      , \"station\":    \"GHCND:USW00013872\" \
+\      , \"attributes\": \",,0,2400\" \
+\      , \"value\":      267 \
+\      } \
+\    , { \"date\":       \"2010-05-01T00:00:00\" \
+\      , \"datatype\":   \"TMIN\" \
+\      , \"station\":    \"GHCND:USW00013872\" \
+\      , \"attributes\": \",,0,2400\" \
+\      , \"value\":      139 \
+\      } \
+\    , { \"date\":       \"2010-05-01T00:00:00\" \
+\      , \"datatype\":   \"TOBS\" \
+\      , \"station\":    \"GHCND:USW00013872\" \
+\      , \"attributes\": \",,0,2400\" \
+\      , \"value\":      206 \
 \      } \
 \    ] \
 \  }"

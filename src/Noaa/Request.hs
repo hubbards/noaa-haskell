@@ -11,12 +11,14 @@ module Noaa.Request
   , LocationCatagoriesParameters (..)
   , LocationsParameters (..)
   , StationsParameters (..)
+  , DataParameters (..)
   , defaultDataSetsParameters
   , defaultDataCatagoriesParameters
   , defaultDataTypesParameters
   , defaultLocationCatagoriesParameters
   , defaultLocationsParameters
   , defaultStationsParameters
+  , defaultDataParameters
 
   , dataSetsRequest
   , dataCatagoriesRequest
@@ -24,6 +26,7 @@ module Noaa.Request
   , locationCatagoriesRequest
   , locationsRequest
   , stationsRequest
+  , dataRequest
   ) where
 
 -- NOTE from bytestring package
@@ -179,6 +182,24 @@ data StationsParameters =
     , stationsParametersOffset         :: Maybe Int -- default is 0
     } deriving Eq
 
+-- | Additional parameters for data requests, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#data>.
+-- TODO Units type for "standard" or "metric"
+data DataParameters =
+  DataParameters
+    { dataParametersDataSetId  :: String
+    , dataParametersDataTypeId :: Maybe String
+    , dataParametersLocationId :: Maybe String
+    , dataParametersStationId  :: Maybe String
+    , dataParametersStartDate  :: Maybe Day
+    , dataParametersEndDate    :: Maybe Day
+    , dataParametersUnits      :: Maybe String
+    , dataParametersSortField  :: Maybe SortField
+    , dataParametersSortOrder  :: Maybe SortOrder -- default is Asc
+    , dataParametersLimit      :: Maybe Int -- default is 25, max is 1000
+    , dataParametersOffset     :: Maybe Int -- default is 0
+    } deriving Eq
+
 -- TODO document
 defaultDataSetsParameters :: DataSetsParameters
 defaultDataSetsParameters =
@@ -269,6 +290,23 @@ defaultStationsParameters =
     , stationsParametersOffset         = Nothing
     }
 
+-- TODO document
+defaultDataParameters :: String -> DataParameters
+defaultDataParameters dataSetId =
+  DataParameters
+    { dataParametersDataSetId  = dataSetId
+    , dataParametersDataTypeId = Nothing
+    , dataParametersLocationId = Nothing
+    , dataParametersStationId  = Nothing
+    , dataParametersStartDate  = Nothing
+    , dataParametersEndDate    = Nothing
+    , dataParametersUnits      = Nothing
+    , dataParametersSortField  = Nothing
+    , dataParametersSortOrder  = Nothing
+    , dataParametersLimit      = Nothing
+    , dataParametersOffset     = Nothing
+    }
+
 buildQueryItem :: Show a => B.ByteString -> a -> QueryItem
 buildQueryItem name value =
   (name, Just . C8.pack . show $ value)
@@ -317,6 +355,11 @@ instance QueryLike LocationsParameters where
 instance QueryLike StationsParameters where
   toQuery params = undefined
 
+-- TODO implement
+instance QueryLike DataParameters where
+  toQuery params =
+    ("datasetid", Just $ C8.pack $ dataParametersDataSetId params) : undefined
+
 noaaHost :: B.ByteString
 noaaHost =
   "www.ncdc.noaa.gov"
@@ -351,6 +394,10 @@ locationsPath =
 stationsPath :: [Text]
 stationsPath =
   noaaPath ++ ["stations"]
+
+dataPath :: [Text]
+dataPath =
+  noaaPath ++ ["data"]
 
 defaultNoaaRequest :: B.ByteString -> Request
 defaultNoaaRequest token =
@@ -394,3 +441,8 @@ locationsRequest =
 stationsRequest :: B.ByteString -> StationsParameters -> Request
 stationsRequest =
   flip noaaRequest stationsPath
+
+-- TODO document
+dataRequest :: B.ByteString -> DataParameters -> Request
+dataRequest =
+  flip noaaRequest dataPath

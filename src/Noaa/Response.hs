@@ -12,6 +12,7 @@ module Noaa.Response
   , LocationCatagory (..)
   , Location (..)
   , Station (..)
+  , Data (..)
   ) where
 
 -- NOTE from aeson package
@@ -28,6 +29,7 @@ import qualified Data.ByteString.Char8 as C8
 
 -- NOTE from time package
 import Data.Time.Calendar (Day)
+import Data.Time.LocalTime (LocalTime)
 
 -- | Domain type for collections.
 data Collection a =
@@ -192,3 +194,24 @@ instance FromJSON Station where
         <*> o .: "elevationUnit"
         <*> o .: "latitude"
         <*> o .: "longitude"
+
+-- | Domain type for data, see
+-- <https://www.ncdc.noaa.gov/cdo-web/webservices/v2#data>.
+data Data =
+  Data
+    { dataDate       :: LocalTime
+    , dataDataType   :: String
+    , dataStation    :: String
+    , dataAttributes :: String
+    , dataValue      :: Float
+    } deriving (Eq, Show)
+
+instance FromJSON Data where
+  parseJSON =
+    withObject "Data" $ \ o ->
+      Data
+        <$> o .: "date"
+        <*> o .: "datatype"
+        <*> o .: "station"
+        <*> o .: "attributes"
+        <*> o .: "value"
