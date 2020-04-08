@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 {-| TODO module documentation -}
 module Main where
 
@@ -11,6 +9,7 @@ import Network.HTTP.Simple
 
 -- NOTE from bytestring package
 import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as C8
 
 import Noaa.Request
 import Noaa.Response
@@ -19,5 +18,6 @@ import Noaa.Response
 main :: IO ()
 main = putStrLn "App not yet implemented"
 
-getDataSets :: B.ByteString -> DataSetsParameters -> IO (Response (Collection DataSet))
-getDataSets token params = httpJSON (dataSetsRequest token params)
+getDataSets :: String -> IO (Response (Collection DataSet))
+getDataSets token =
+  httpJSON $ dataSetsRequest (C8.pack token) defaultDataSetsParameters
