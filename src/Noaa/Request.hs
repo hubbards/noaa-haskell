@@ -402,6 +402,7 @@ dataPath =
 defaultNoaaRequest :: B.ByteString -> Request
 defaultNoaaRequest token =
     setRequestSecure True
+  . setRequestPort 443
   . setRequestHost noaaHost
   . setRequestHeader "token" [token]
   $ defaultRequest
