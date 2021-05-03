@@ -341,19 +341,19 @@ instance QueryLike DataCatagoriesParameters where
 
 -- TODO implement
 instance QueryLike DataTypesParameters where
-  toQuery params = undefined
+  toQuery = undefined
 
 -- TODO implement
 instance QueryLike LocationCatagoriesParameters where
-  toQuery params = undefined
+  toQuery = undefined
 
 -- TODO implement
 instance QueryLike LocationsParameters where
-  toQuery params = undefined
+  toQuery = undefined
 
 -- TODO implement
 instance QueryLike StationsParameters where
-  toQuery params = undefined
+  toQuery = undefined
 
 -- TODO implement
 instance QueryLike DataParameters where
